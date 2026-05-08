@@ -1,9 +1,11 @@
-import type { Employee, User, Vehicle } from "@/types";
+import type { AuditLog, Employee, User, Vehicle } from "@/types";
 
 const now = new Date();
 const iso = (date: Date) => date.toISOString();
 const daysAgo = (days: number) =>
   iso(new Date(now.getTime() - days * 24 * 60 * 60 * 1000));
+const hoursAgo = (hours: number) =>
+  iso(new Date(now.getTime() - hours * 60 * 60 * 1000));
 
 export const seedVehicles: Vehicle[] = [
   {
@@ -152,5 +154,63 @@ export const seedUsers: User[] = [
     name: "林大同",
     role: "user",
     employeeId: "emp-002",
+  },
+];
+
+export const seedAuditLogs: AuditLog[] = [
+  {
+    id: "log-001",
+    createdAt: hoursAgo(2),
+    actorId: "usr-admin",
+    actorUsername: "admin",
+    actorName: "陳怡君",
+    resource: "vehicle",
+    resourceId: "veh-008",
+    action: "create",
+    summary: "新增車輛 ABC-1241 (Isuzu D-Max)",
+  },
+  {
+    id: "log-002",
+    createdAt: hoursAgo(8),
+    actorId: "usr-admin",
+    actorUsername: "admin",
+    actorName: "陳怡君",
+    resource: "vehicle",
+    resourceId: "veh-003",
+    action: "update",
+    summary: "狀態 = available → maintenance",
+  },
+  {
+    id: "log-003",
+    createdAt: daysAgo(1),
+    actorId: "usr-admin",
+    actorUsername: "admin",
+    actorName: "陳怡君",
+    resource: "employee",
+    resourceId: "emp-005",
+    action: "create",
+    summary: "新增員工 E005 (李建宏)",
+  },
+  {
+    id: "log-004",
+    createdAt: daysAgo(2),
+    actorId: "usr-admin",
+    actorUsername: "admin",
+    actorName: "陳怡君",
+    resource: "employee",
+    resourceId: "emp-004",
+    action: "update",
+    summary: "Email = h.zhang@old.com → huimei.zhang@example.com",
+  },
+  {
+    id: "log-005",
+    createdAt: daysAgo(3),
+    actorId: "usr-admin",
+    actorUsername: "admin",
+    actorName: "陳怡君",
+    resource: "vehicle",
+    resourceId: "veh-legacy-99",
+    action: "delete",
+    summary: "刪除車輛 ZZZ-9999 (Suzuki Swift)",
   },
 ];

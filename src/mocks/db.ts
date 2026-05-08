@@ -1,18 +1,26 @@
-import type { Employee, User, Vehicle } from "@/types";
-import { seedEmployees, seedUsers, seedVehicles } from "./seed";
+import type { AuditLog, Employee, User, Vehicle } from "@/types";
+import {
+  seedAuditLogs,
+  seedEmployees,
+  seedUsers,
+  seedVehicles,
+} from "./seed";
 
 const STORAGE_KEY = "mock-db:v1";
+const AUDIT_LOG_LIMIT = 1000;
 
 interface DbShape {
   vehicles: Vehicle[];
   employees: Employee[];
   users: User[];
+  auditLogs: AuditLog[];
 }
 
 const initial: DbShape = {
   vehicles: structuredClone(seedVehicles),
   employees: structuredClone(seedEmployees),
   users: structuredClone(seedUsers),
+  auditLogs: structuredClone(seedAuditLogs),
 };
 
 function load(): DbShape {
@@ -25,6 +33,7 @@ function load(): DbShape {
       vehicles: parsed.vehicles ?? structuredClone(initial.vehicles),
       employees: parsed.employees ?? structuredClone(initial.employees),
       users: parsed.users ?? structuredClone(initial.users),
+      auditLogs: parsed.auditLogs ?? structuredClone(initial.auditLogs),
     };
   } catch {
     return structuredClone(initial);
@@ -48,12 +57,23 @@ export const db = {
   get users() {
     return state.users;
   },
+  get auditLogs() {
+    return state.auditLogs;
+  },
   setVehicles(next: Vehicle[]) {
     state = { ...state, vehicles: next };
     persist();
   },
   setEmployees(next: Employee[]) {
     state = { ...state, employees: next };
+    persist();
+  },
+  appendAuditLog(log: AuditLog) {
+    const next = [log, ...state.auditLogs];
+    if (next.length > AUDIT_LOG_LIMIT) {
+      next.length = AUDIT_LOG_LIMIT;
+    }
+    state = { ...state, auditLogs: next };
     persist();
   },
   reset() {

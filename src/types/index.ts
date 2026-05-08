@@ -56,3 +56,11 @@ export interface TypeDistribution {
   type: VehicleType;
   count: number;
 }
+
+export type {
+  AuditAction,
+  AuditLog,
+  AuditLogListResponse,
+  AuditLogQuery,
+  AuditResource,
+} from "./auditLog";

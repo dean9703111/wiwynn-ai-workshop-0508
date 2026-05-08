@@ -2,6 +2,7 @@ import { http, HttpResponse } from "msw";
 import type { Vehicle, VehicleStatus, VehicleType } from "@/types";
 import { db } from "../db";
 import { getRequestUser } from "../auth";
+import { appendAuditLog, buildUpdateSummary } from "../auditLogger";
 
 interface VehicleInput {
   plateNumber: string;
@@ -11,6 +12,19 @@ interface VehicleInput {
   status: VehicleStatus;
   year: number;
 }
+
+const VEHICLE_TYPE_LABELS: Record<VehicleType, string> = {
+  sedan: "轎車",
+  suv: "SUV",
+  truck: "卡車",
+  van: "廂型車",
+};
+
+const VEHICLE_STATUS_LABELS: Record<VehicleStatus, string> = {
+  available: "available",
+  "in-use": "in-use",
+  maintenance: "maintenance",
+};
 
 function unauthorized() {
   return HttpResponse.json({ message: "unauthorized" }, { status: 401 });
@@ -26,6 +40,10 @@ function conflict(field: string) {
     { message: "conflict", field },
     { status: 409 }
   );
+}
+
+function describeVehicle(v: Pick<Vehicle, "plateNumber" | "brand" | "model">) {
+  return `${v.plateNumber} (${v.brand} ${v.model})`;
 }
 
 export const vehicleHandlers = [
@@ -74,6 +92,13 @@ export const vehicleHandlers = [
       createdAt: new Date().toISOString(),
     };
     db.setVehicles([next, ...db.vehicles]);
+    appendAuditLog({
+      actor: user,
+      resource: "vehicle",
+      resourceId: next.id,
+      action: "create",
+      summary: `新增車輛 ${describeVehicle(next)}`,
+    });
     return HttpResponse.json(next, { status: 201 });
   }),
 
@@ -84,6 +109,7 @@ export const vehicleHandlers = [
     const id = params.id as string;
     const idx = db.vehicles.findIndex((v) => v.id === id);
     if (idx < 0) return notFound();
+    const before = db.vehicles[idx];
     const body = (await request.json()) as VehicleInput;
     const duplicate = db.vehicles.some(
       (v) =>
@@ -92,12 +118,20 @@ export const vehicleHandlers = [
     );
     if (duplicate) return conflict("plateNumber");
     const updated: Vehicle = {
-      ...db.vehicles[idx],
+      ...before,
       ...body,
     };
     const next = db.vehicles.slice();
     next[idx] = updated;
     db.setVehicles(next);
+    const changes = diffVehicle(before, updated);
+    appendAuditLog({
+      actor: user,
+      resource: "vehicle",
+      resourceId: updated.id,
+      action: "update",
+      summary: buildUpdateSummary(changes),
+    });
     return HttpResponse.json(updated);
   }),
 
@@ -106,9 +140,52 @@ export const vehicleHandlers = [
     if (!user) return unauthorized();
     if (user.role !== "admin") return forbidden();
     const id = params.id as string;
-    const exists = db.vehicles.some((v) => v.id === id);
-    if (!exists) return notFound();
+    const target = db.vehicles.find((v) => v.id === id);
+    if (!target) return notFound();
     db.setVehicles(db.vehicles.filter((v) => v.id !== id));
+    appendAuditLog({
+      actor: user,
+      resource: "vehicle",
+      resourceId: target.id,
+      action: "delete",
+      summary: `刪除車輛 ${describeVehicle(target)}`,
+    });
     return new HttpResponse(null, { status: 204 });
   }),
 ];
+
+function diffVehicle(before: Vehicle, after: Vehicle) {
+  const changes: { label: string; before: unknown; after: unknown }[] = [];
+  if (before.plateNumber !== after.plateNumber) {
+    changes.push({
+      label: "車牌",
+      before: before.plateNumber,
+      after: after.plateNumber,
+    });
+  }
+  if (before.brand !== after.brand || before.model !== after.model) {
+    changes.push({
+      label: "品牌型號",
+      before: `${before.brand} ${before.model}`,
+      after: `${after.brand} ${after.model}`,
+    });
+  }
+  if (before.type !== after.type) {
+    changes.push({
+      label: "類型",
+      before: VEHICLE_TYPE_LABELS[before.type],
+      after: VEHICLE_TYPE_LABELS[after.type],
+    });
+  }
+  if (before.status !== after.status) {
+    changes.push({
+      label: "狀態",
+      before: VEHICLE_STATUS_LABELS[before.status],
+      after: VEHICLE_STATUS_LABELS[after.status],
+    });
+  }
+  if (before.year !== after.year) {
+    changes.push({ label: "年份", before: before.year, after: after.year });
+  }
+  return changes;
+}
