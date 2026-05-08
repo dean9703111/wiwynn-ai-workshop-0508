@@ -90,7 +90,7 @@ describe("LoginPage", () => {
 
     it("送出期間「登入」按鈕被 disable 並顯示 loading icon", async () => {
       const user = userEvent.setup();
-      let resolvePost: (v: unknown) => void = () => {};
+      let resolvePost: (v: unknown) => void = () => { };
       mockedApiPost.mockImplementation(
         () =>
           new Promise((resolve) => {
@@ -228,7 +228,7 @@ describe("LoginPage", () => {
       await user.click(screen.getByRole("button", { name: "登入" }));
 
       await waitFor(() =>
-        expect(useAuthStore.getState().token).toBe("tok-1")
+        expect(useAuthStore.getState().token).toBe("tok-snrdmtmumyu1")
       );
       expect(useAuthStore.getState().user).toEqual(authUser);
     });
