@@ -5,6 +5,7 @@ import { LoginPage } from "@/pages/LoginPage";
 import { DashboardPage } from "@/pages/DashboardPage";
 import { VehiclesPage } from "@/pages/VehiclesPage";
 import { EmployeesPage } from "@/pages/EmployeesPage";
+import { AuditLogsPage } from "@/pages/AuditLogsPage";
 import { useAuthStore } from "@/stores/auth";
 
 export function AppRouter() {
@@ -21,6 +22,7 @@ export function AppRouter() {
           <Route path="/vehicles" element={<VehiclesPage />} />
           <Route element={<ProtectedRoute requiredRole="admin" />}>
             <Route path="/employees" element={<EmployeesPage />} />
+            <Route path="/audit-logs" element={<AuditLogsPage />} />
           </Route>
         </Route>
       </Route>

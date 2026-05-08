@@ -1,5 +1,5 @@
 import { NavLink, Outlet, useNavigate } from "react-router-dom";
-import { Car, LayoutDashboard, LogOut, Users } from "lucide-react";
+import { Car, LayoutDashboard, LogOut, ScrollText, Users } from "lucide-react";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import {
@@ -32,6 +32,12 @@ const navItems = [
     to: "/employees",
     label: "員工管理",
     icon: Users,
+    role: "admin" as const,
+  },
+  {
+    to: "/audit-logs",
+    label: "操作紀錄",
+    icon: ScrollText,
     role: "admin" as const,
   },
 ];
