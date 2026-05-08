@@ -1,3 +1,47 @@
-node_modules
+# === Dependencies ===
+node_modules/
+
+# === Build output ===
+dist/
+*.tsbuildinfo
+
+# === Test / coverage ===
+coverage/
+
+# === Logs ===
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# === Env files（保留 .env.example 範本）===
 .env
+.env.local
+.env.*.local
+!.env.example
+
+# === OS ===
 .DS_Store
+Thumbs.db
+
+# === Editor ===
+.idea/
+*.swp
+*.swo
+
+# === VSCode（保留共享設定，個人 settings 請放 settings.local.json）===
+.vscode/*
+!.vscode/extensions.json
+!.vscode/settings.json
+
+# === Husky 內部資料夾（由 husky install 自動產生）===
+.husky/_/
+
+# === AI Agent / Spec 目錄：本 repo 為課程教材，下列目錄屬教學素材，明確保留版控 ===
+!.agents/
+!.agent/
+!.claude/
+!.codex/
+!.cursor/
+!openspec/

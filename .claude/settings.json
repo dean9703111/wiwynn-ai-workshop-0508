@@ -1,0 +1,14 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(npm test *)",
+      "Bash(npm run *)",
+      "Bash(npx eslint *)",
+      "Bash(grep -E \"\\(Linting|tsx?$|jsx?$\\)\")",
+      "Bash(npx tsc *)",
+      "Bash(npx vite *)",
+      "Bash(openspec status *)",
+      "Bash(git -C /Users/lindingyuan/wiwynn-ai-workshop-0508 log --oneline -20)"
+    ]
+  }
+}

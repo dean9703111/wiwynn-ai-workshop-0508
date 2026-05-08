@@ -1,0 +1,68 @@
+schema: spec-driven
+
+context: |
+  ## 專案定位
+  這是一個 AI 課程的範例 repo，內含兩個面向：
+  1. Agent Skills 練習場 — `.agents/skills/`、`.claude/skills/`、`.cursor/skills/`、`.codex/skills/` 各自存放同一組 Skill 提示詞腳本（git-smart-commit、git-pr-description、git-branch-name、gen-test-cases、openspec-* 等），修改時通常需要同步多個目錄。
+  2. 車輛管理系統 (Vehicle Management System, VMS) MVP — 用來示範 OpenSpec 流程的前端應用，**沒有真實後端**，所有 `/api/*` 由 MSW 攔截。
+
+  ## 技術棧
+  - 執行環境：Node.js ≥ 20、ESM (`"type": "module"`)
+  - 前端：Vite 5 + React 18 + TypeScript (strict)
+  - UI：Tailwind CSS 3 + shadcn/ui + Magic UI（動效）+ lucide-react
+  - 狀態與資料：TanStack Query v5、Zustand 5（auth store 用 persist middleware → `localStorage` key `vms-auth`）
+  - 表單：react-hook-form + zod (`@hookform/resolvers`)
+  - 路由：react-router-dom v6（`ProtectedRoute` 雙層權限：登入 + `requiredRole`）
+  - 圖表：recharts
+  - Mock 後端：MSW 2.x（`src/mocks/handlers/*` 依資源切檔；`src/mocks/db.ts` 為 in-memory DB，持久化到 `localStorage` key `mock-db:v1`，`window.__resetMockDb()` 還原）
+  - 測試：Jest（`--experimental-vm-modules`，純 ESM 測試素材在 `src/skills/__tests__/`、`src/lib/__tests__/`，這些目錄被 `tsconfig.json` 的 `exclude` 排除，**不參與 type check**）
+  - Lint：ESLint 9 flat config (`eslint.config.js`)
+  - Hooks：Husky pre-commit 並行跑 `lint` 與 `test`
+
+  ## 路徑慣例
+  - `@/*` → `src/*`（同時設定在 `vite.config.ts` 與 `tsconfig.json`），新增 import 一律使用 `@/` 開頭。
+  - 頁面薄、邏輯放 `src/features/<domain>/`：每個 domain 自帶 `api.ts`（query/mutation hooks）+ Form Dialog / Charts 元件。
+  - shadcn 元件統一放 `src/components/ui/`，Magic UI 放 `src/components/magicui/`。
+
+  ## Domain：車輛管理系統 (VMS)
+  目前已建立的 capabilities（位於 `openspec/specs/`）：
+  - `auth` — 帳密登入、Session 持久化、路由守衛 + 角色控制（admin / user）
+  - `dashboard` — KPI 卡片 + 車輛狀態 / 類型分佈圖
+  - `vehicle-management` — 車輛 CRUD（user 唯讀、admin 可寫；plateNumber 唯一）
+  - `employee-management` — 員工 CRUD（僅 admin；employeeNo / email 唯一；防止刪除自己）
+  - `mock-api` — MSW handlers + 內存 DB + 種子資料
+
+  Demo 帳號（在 `src/mocks/seed.ts`）：`admin/admin123`（管理者，全部頁面 + 寫入）、`user/user123`（一般使用者，唯讀）。
+
+  ## 撰寫慣例
+  - Commit message：Conventional Commits，subject 用繁體中文，scope 對應功能或模組（如 `feat(skill):`、`chore(project):`、`feat(echo):`、`docs(project):`）。
+  - 文件、UI 文案、Spec 內容、Scenario 描述：**繁體中文**。
+  - 程式碼識別字（變數、函式、檔名、capability id）：英文 kebab-case 或 camelCase。
+  - 錯誤處理：API 統一拋 `ApiError`（見 `src/lib/api.ts`）；401 自動觸發 `useAuthStore.getState().logout()`。
+  - 表單：一律使用 react-hook-form + zod schema，server 回 409 時用 `setError` 把錯誤對應到欄位，回 4xx/5xx 用 sonner toast。
+
+rules:
+  proposal:
+    - 結構固定四節：`## Why`、`## What Changes`、`## Capabilities`（含 `### New Capabilities` / `### Modified Capabilities` 子節）、`## Impact`。
+    - 「What Changes」最後一條使用 `**BREAKING**:` 標記是否有破壞性變更；無則寫「不適用」並說明原因。
+    - 每個列出的 capability 都必須對應 `openspec/specs/<id>/spec.md`（新增或修改）；id 用 kebab-case。
+    - 「Impact」需點出：新建程式碼位置、相依套件異動、建置工具變更、受影響的既有檔案、是否需要後端。
+    - 全文使用繁體中文，控制在 500 字以內。
+
+  spec:
+    - 檔名一律 `openspec/specs/<capability-id>/spec.md`；標題 `# <capability-id> Specification`。
+    - 必含 `## Purpose`（一段話描述此 capability 的角色）與 `## Requirements`。
+    - 每條需求用 `### Requirement: <繁中標題>`，內文以 `SHALL` / `MUST` / `MAY` 等 RFC 2119 詞彙描述系統行為，並具體點到 endpoint、欄位、UI 元件名。
+    - 每條 Requirement 至少配 1 個 `#### Scenario:` 區塊，內容用 `- **WHEN** ...` / `- **THEN** ...` 兩行（必要時加 `**AND**`），且至少涵蓋一個 happy path 與一個錯誤 / 權限 / 邊界情境。
+    - 涉及帳號 / 權限的 scenario 必須點明角色（admin / user）與預期導向行為。
+
+  tasks:
+    - 檔名 `openspec/changes/<change-id>/tasks.md`，採章節編號（`## 1. <主題>`、`## 2. ...`）。
+    - 子任務以 `- [ ] x.y ` 開頭，動詞起頭、可獨立勾選；完成後改 `- [x]`。
+    - 章節需對齊 capabilities：典型順序為「專案 Bootstrap → Mock API (mock-api) → 應用基礎設施 → 路由與 Layout → 各 capability 頁面 → 收尾（含 lint / build / 手動驗收）」。
+    - 涉及 MSW handler 的任務必須同時列出唯一性檢查、權限檢查、錯誤碼（400 / 401 / 403 / 404 / 409）的處理。
+    - 每個章節結尾的「收尾」階段需包含跑 `npm run lint`、`npm run build`、以 `npm run dev` 走過 admin 與 user 兩條關鍵動線。
+
+  design:
+    - 僅在變更影響架構（新相依、新模組邊界、跨 capability 整合、資料模型變動）時才建立 `design.md`；單純文案 / UI 微調不需要。
+    - 內容聚焦在「為什麼這樣切」與「替代方案被淘汰的理由」，不複製 proposal 的描述。

@@ -1,0 +1,156 @@
+import type { Employee, User, Vehicle } from "@/types";
+
+const now = new Date();
+const iso = (date: Date) => date.toISOString();
+const daysAgo = (days: number) =>
+  iso(new Date(now.getTime() - days * 24 * 60 * 60 * 1000));
+
+export const seedVehicles: Vehicle[] = [
+  {
+    id: "veh-001",
+    plateNumber: "ABC-1234",
+    brand: "Toyota",
+    model: "Camry",
+    type: "sedan",
+    status: "available",
+    year: 2022,
+    createdAt: daysAgo(120),
+  },
+  {
+    id: "veh-002",
+    plateNumber: "ABC-1235",
+    brand: "Honda",
+    model: "CR-V",
+    type: "suv",
+    status: "in-use",
+    year: 2021,
+    createdAt: daysAgo(90),
+  },
+  {
+    id: "veh-003",
+    plateNumber: "ABC-1236",
+    brand: "Ford",
+    model: "F-150",
+    type: "truck",
+    status: "maintenance",
+    year: 2020,
+    createdAt: daysAgo(60),
+  },
+  {
+    id: "veh-004",
+    plateNumber: "ABC-1237",
+    brand: "Mazda",
+    model: "CX-5",
+    type: "suv",
+    status: "available",
+    year: 2023,
+    createdAt: daysAgo(45),
+  },
+  {
+    id: "veh-005",
+    plateNumber: "ABC-1238",
+    brand: "Mercedes-Benz",
+    model: "Sprinter",
+    type: "van",
+    status: "in-use",
+    year: 2022,
+    createdAt: daysAgo(30),
+  },
+  {
+    id: "veh-006",
+    plateNumber: "ABC-1239",
+    brand: "Tesla",
+    model: "Model 3",
+    type: "sedan",
+    status: "available",
+    year: 2024,
+    createdAt: daysAgo(20),
+  },
+  {
+    id: "veh-007",
+    plateNumber: "ABC-1240",
+    brand: "Hyundai",
+    model: "Staria",
+    type: "van",
+    status: "maintenance",
+    year: 2021,
+    createdAt: daysAgo(10),
+  },
+  {
+    id: "veh-008",
+    plateNumber: "ABC-1241",
+    brand: "Isuzu",
+    model: "D-Max",
+    type: "truck",
+    status: "available",
+    year: 2023,
+    createdAt: daysAgo(5),
+  },
+];
+
+export const seedEmployees: Employee[] = [
+  {
+    id: "emp-001",
+    employeeNo: "E001",
+    name: "陳怡君",
+    email: "yijun.chen@example.com",
+    department: "資訊部",
+    role: "admin",
+    createdAt: daysAgo(200),
+  },
+  {
+    id: "emp-002",
+    employeeNo: "E002",
+    name: "林大同",
+    email: "datong.lin@example.com",
+    department: "業務部",
+    role: "user",
+    createdAt: daysAgo(150),
+  },
+  {
+    id: "emp-003",
+    employeeNo: "E003",
+    name: "王曉明",
+    email: "xiaoming.wang@example.com",
+    department: "業務部",
+    role: "user",
+    createdAt: daysAgo(120),
+  },
+  {
+    id: "emp-004",
+    employeeNo: "E004",
+    name: "張惠美",
+    email: "huimei.zhang@example.com",
+    department: "行政部",
+    role: "user",
+    createdAt: daysAgo(80),
+  },
+  {
+    id: "emp-005",
+    employeeNo: "E005",
+    name: "李建宏",
+    email: "jianhong.li@example.com",
+    department: "車隊管理",
+    role: "user",
+    createdAt: daysAgo(40),
+  },
+];
+
+export const seedUsers: User[] = [
+  {
+    id: "usr-admin",
+    username: "admin",
+    password: "admin123",
+    name: "陳怡君",
+    role: "admin",
+    employeeId: "emp-001",
+  },
+  {
+    id: "usr-user",
+    username: "user",
+    password: "user123",
+    name: "林大同",
+    role: "user",
+    employeeId: "emp-002",
+  },
+];

@@ -2,11 +2,11 @@ import { echo } from "../echo.js";
 
 describe("echo skill", () => {
   it("returns the same string", () => {
-    expect(echo("hello")).toBe("helloa")
+    expect(echo("hello")).toBe("hello")
   });
 
   it("returns an empty string", () => {
-    expect(echo("")).toBe("12");
+    expect(echo("")).toBe("");
   });
 
   it("throws when given a non-string", () => {
