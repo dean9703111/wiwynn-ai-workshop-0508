@@ -1,0 +1,63 @@
+{
+  "version": 1,
+  "createdAt": "2026-05-08T02:59:17.434Z",
+  "scope": "project",
+  "operation": "change-to-agents",
+  "entries": [
+    {
+      "originalPath": "/Users/lindingyuan/wiwynn-ai-workshop-0508/.agents/commands",
+      "kind": "dir",
+      "action": "create"
+    },
+    {
+      "originalPath": "/Users/lindingyuan/wiwynn-ai-workshop-0508/.claude/commands",
+      "kind": "symlink",
+      "action": "create"
+    },
+    {
+      "originalPath": "/Users/lindingyuan/wiwynn-ai-workshop-0508/.codex/prompts",
+      "kind": "symlink",
+      "action": "create"
+    },
+    {
+      "originalPath": "/Users/lindingyuan/wiwynn-ai-workshop-0508/.cursor/commands",
+      "kind": "symlink",
+      "action": "create"
+    },
+    {
+      "originalPath": "/Users/lindingyuan/wiwynn-ai-workshop-0508/.agent/workflows",
+      "kind": "symlink",
+      "action": "create"
+    },
+    {
+      "originalPath": "/Users/lindingyuan/wiwynn-ai-workshop-0508/.agents/hooks",
+      "kind": "dir",
+      "action": "create"
+    },
+    {
+      "originalPath": "/Users/lindingyuan/wiwynn-ai-workshop-0508/.claude/hooks",
+      "kind": "symlink",
+      "action": "create"
+    },
+    {
+      "originalPath": "/Users/lindingyuan/wiwynn-ai-workshop-0508/.claude/skills",
+      "kind": "symlink",
+      "action": "create"
+    },
+    {
+      "originalPath": "/Users/lindingyuan/wiwynn-ai-workshop-0508/.codex/skills",
+      "kind": "symlink",
+      "action": "create"
+    },
+    {
+      "originalPath": "/Users/lindingyuan/wiwynn-ai-workshop-0508/.cursor/skills",
+      "kind": "symlink",
+      "action": "create"
+    },
+    {
+      "originalPath": "/Users/lindingyuan/wiwynn-ai-workshop-0508/.agent/skills",
+      "kind": "symlink",
+      "action": "create"
+    }
+  ]
+}
