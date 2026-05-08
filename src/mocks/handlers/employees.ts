@@ -2,6 +2,7 @@ import { http, HttpResponse } from "msw";
 import type { Employee, Role } from "@/types";
 import { db } from "../db";
 import { getRequestUser } from "../auth";
+import { appendAuditLog, buildUpdateSummary } from "../auditLogger";
 
 interface EmployeeInput {
   employeeNo: string;
@@ -10,6 +11,11 @@ interface EmployeeInput {
   department: string;
   role: Role;
 }
+
+const ROLE_LABELS: Record<Role, string> = {
+  admin: "管理者",
+  user: "一般使用者",
+};
 
 function unauthorized() {
   return HttpResponse.json({ message: "unauthorized" }, { status: 401 });
@@ -28,6 +34,10 @@ function conflict(field: string) {
 }
 function badRequest(message: string) {
   return HttpResponse.json({ message }, { status: 400 });
+}
+
+function describeEmployee(e: Pick<Employee, "employeeNo" | "name">) {
+  return `${e.employeeNo} (${e.name})`;
 }
 
 export const employeeHandlers = [
@@ -83,6 +93,13 @@ export const employeeHandlers = [
       createdAt: new Date().toISOString(),
     };
     db.setEmployees([next, ...db.employees]);
+    appendAuditLog({
+      actor: user,
+      resource: "employee",
+      resourceId: next.id,
+      action: "create",
+      summary: `新增員工 ${describeEmployee(next)}`,
+    });
     return HttpResponse.json(next, { status: 201 });
   }),
 
@@ -93,6 +110,7 @@ export const employeeHandlers = [
     const id = params.id as string;
     const idx = db.employees.findIndex((e) => e.id === id);
     if (idx < 0) return notFound();
+    const before = db.employees[idx];
     const body = (await request.json()) as EmployeeInput;
     if (
       db.employees.some(
@@ -112,10 +130,18 @@ export const employeeHandlers = [
     ) {
       return conflict("email");
     }
-    const updated: Employee = { ...db.employees[idx], ...body };
+    const updated: Employee = { ...before, ...body };
     const next = db.employees.slice();
     next[idx] = updated;
     db.setEmployees(next);
+    const changes = diffEmployee(before, updated);
+    appendAuditLog({
+      actor: user,
+      resource: "employee",
+      resourceId: updated.id,
+      action: "update",
+      summary: buildUpdateSummary(changes),
+    });
     return HttpResponse.json(updated);
   }),
 
@@ -130,6 +156,45 @@ export const employeeHandlers = [
       return badRequest("無法刪除目前登入的帳號");
     }
     db.setEmployees(db.employees.filter((e) => e.id !== id));
+    appendAuditLog({
+      actor: user,
+      resource: "employee",
+      resourceId: target.id,
+      action: "delete",
+      summary: `刪除員工 ${describeEmployee(target)}`,
+    });
     return new HttpResponse(null, { status: 204 });
   }),
 ];
+
+function diffEmployee(before: Employee, after: Employee) {
+  const changes: { label: string; before: unknown; after: unknown }[] = [];
+  if (before.employeeNo !== after.employeeNo) {
+    changes.push({
+      label: "員工編號",
+      before: before.employeeNo,
+      after: after.employeeNo,
+    });
+  }
+  if (before.name !== after.name) {
+    changes.push({ label: "姓名", before: before.name, after: after.name });
+  }
+  if (before.email !== after.email) {
+    changes.push({ label: "Email", before: before.email, after: after.email });
+  }
+  if (before.department !== after.department) {
+    changes.push({
+      label: "部門",
+      before: before.department,
+      after: after.department,
+    });
+  }
+  if (before.role !== after.role) {
+    changes.push({
+      label: "角色",
+      before: ROLE_LABELS[before.role],
+      after: ROLE_LABELS[after.role],
+    });
+  }
+  return changes;
+}
