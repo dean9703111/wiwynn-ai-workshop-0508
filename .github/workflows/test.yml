@@ -1,0 +1,37 @@
+name: Test
+
+on:
+  push:
+    branches: ["**"]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: "npm"
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run tests with coverage
+        run: npm test -- --coverage
+
+      - name: Compute artifact name
+        id: meta
+        run: echo "branch=${GITHUB_REF_NAME//\//-}" >> "$GITHUB_OUTPUT"
+
+      - name: Upload coverage report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: coverage-${{ steps.meta.outputs.branch }}-${{ github.run_number }}
+          path: coverage/
+          retention-days: 14
+          if-no-files-found: warn

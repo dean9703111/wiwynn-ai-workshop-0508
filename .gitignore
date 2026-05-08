@@ -45,3 +45,6 @@ Thumbs.db
 !.codex/
 !.cursor/
 !openspec/
+
+# === PR 暫存稿 ===
+pr-review.md
